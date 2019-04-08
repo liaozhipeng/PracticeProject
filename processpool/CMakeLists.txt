@@ -4,5 +4,7 @@ add_compile_options(-std=c++11)
 
 find_package(Threads)
 FILE(GLOB_RECURSE CURRENT_SOURCES src/*.cpp)  
-add_executable(gdb_test ${CURRENT_SOURCES})
+#FILE(GLOB_RECURSE CURRENT_SOURCES src/taskQueueTest.cpp src/TaskQueue.cpp)  
+#add_executable(gdb_test ${CURRENT_SOURCES})
+add_executable(gdb_test src/taskQueueTestConsumer.cpp)
 target_link_libraries(gdb_test ${CMAKE_THREAD_LIBS_INIT})

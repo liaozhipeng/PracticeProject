@@ -6,10 +6,15 @@
 #include <sys/shm.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/types.h>
+#include <unistd.h>
 #define SHMQUEUEOK 1
 #define SHMQUEUEERROR -1
-#define SHMKEY   20190301//用于共享内存创建的键值
-#define SEMKEY   20190302//用于信号量创建的键值 
+#define PATHNAME "."//创建key
+#define PROJ_ID1 0x661 
+#define PROJ_ID2 0x555
 
 //这个队列这里应该优化，传入key值，这样可以控制共享内存打开哪一个
 
@@ -97,10 +102,17 @@ int TaskQueue<T>::Init()
 		m_sErrMsg = m_Sem.GetErrMsg();
 		return ret;
 	}
-	m_iShmId = shmget(SHMKEY,SHMSIZE,0);//根据key开辟指定大小的共享内存，返回的是共享内存标识符
+	key_t key = ftok(PATHNAME,PROJ_ID2);
+	if(key < 0)
+	{
+		std::cerr << "ftok error" << std::endl;
+		exit(2);
+	}
+	//m_iShmId = ::shmget(key,SHMSIZE,IPC_CREAT|0666);
+	m_iShmId = ::shmget(key,0,0);//获取key对应的共享内存
 	if (m_iShmId < 0) {//如果这块内存不存在就要自己创建
 		m_iCreate = 1;
-		m_iShmId = shmget(SHMKEY, SHMSIZE, IPC_CREAT);
+		m_iShmId = ::shmget(key, SHMSIZE, IPC_CREAT|0666);//根据key开辟指定大小的共享内存，返回的是共享内存标识符
 	}
 	if (m_iShmId < 0) {
 		m_sErrMsg.clear();
@@ -124,6 +136,7 @@ int TaskQueue<T>::Init()
 		oQueryHead.uFront = 0;
 		oQueryHead.uRear = 0;
 		memcpy(m_pShm,&oQueryHead,sizeof(QueueHead));//把队列信息复制共享内存区
+		std::cout<<"TaskQueue Init!\n";
 	}
 	
 	return m_iShmId;
@@ -148,7 +161,7 @@ template<typename T>
 int TaskQueue<T>::getSize() {
 	QueueHead oQueryHead;
 	memcpy(&oQueryHead, m_pShm, sizeof(QueueHead));
-	return oQueryHead.uDataCount;
+	return oQueryHead.uDataCount;//这里还要改进，datacount没更新
 }
 
 template<typename T>
@@ -185,5 +198,5 @@ T TaskQueue<T>::pop()
 }
 
 
-#endif // !SHMQUEUE_H
 
+#endif 

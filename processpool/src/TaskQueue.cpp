@@ -2,9 +2,15 @@
 
 int SemLock::Init()
 {
-	m_iSemId = semget(SEMKEY, 1, 0);//根据key创建信号集，数量为1，flag标志位没东西
+	key_t key = ftok(PATHNAME,PROJ_ID1);
+		if(key < 0)
+		{
+			std::cerr << "ftok error" << std::endl;
+			exit(2);
+		}
+	m_iSemId = ::semget(key, 1, 0);//根据key创建信号集，数量为1，flag标志位没东西
 	if (m_iSemId < 0) {
-		m_iSemId = semget(SEMKEY, 1, IPC_CREAT);//如果信号量不存在就自己创建一个
+		m_iSemId = ::semget(key, 1, IPC_CREAT);//如果信号量不存在就自己创建一个
 		m_isCreate = 1;
 	}
 	if (m_iSemId < 0) {
