@@ -1,43 +1,31 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include<stdio.h>
+#include<stdlib.h>
 #include<unistd.h>
-#include<sys/types.h>
+#include<functional>
+#include<assert.h>
+
+using namespace std;
 
 class Process
 {
-private:
-    pid_t _id;
-    void start();
 public:
+    typedef std::function<void*()> ProcessFunc;
+    Process(const ProcessFunc & func);
     Process();
     ~Process();
+    void start();
+    void wait();
+    void setFunc(const ProcessFunc & func);
+
+private:
+    pid_t pid_;
+    bool started_;
+    bool waited_;
+    ProcessFunc func_;
 };
-
-Process::Process()
-{
-    _id = fork();
-    if(_id == 0){
-        //子进程运行
-        start();
-    }
-    else if(_id >= 0)
-    {
-        //什么也不做，返回父进程
-    }
-    
-}
-
-Process::~Process()
-{
-}
-
-void Process::start()
-{
-    while(1){
-
-    }
-}
 
 
 #endif

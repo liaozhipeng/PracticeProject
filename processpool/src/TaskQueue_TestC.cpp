@@ -25,7 +25,7 @@ int main()
     {
         usleep(200000);
         i = Q.pop();
-        std::cout<<"son:"<<i<<std::endl;
+        std::cout<<"son:"<<i<<" "<<Q.getSize()<<std::endl;
     }
     return 0;
 }

@@ -147,21 +147,21 @@ bool TaskQueue<T>::isEmpty()
 {
 	QueueHead oQueryHead;
 	memcpy(&oQueryHead,m_pShm,sizeof(QueueHead));//因为m_pShm只是一个地址，所以要把这个地址
-	return oQueryHead.uFront == oQueryHead.uRear;//开头的信息取出来复制到队列头结构体中，再通过结构体读取队列信息
+	return oQueryHead.uDataCount == 0;//开头的信息取出来复制到队列头结构体中，再通过结构体读取队列信息
 };
 
 template<typename T>
 bool TaskQueue<T>::isFull() {
 	QueueHead oQueryHead;
 	memcpy(&oQueryHead, m_pShm, sizeof(QueueHead));
-	return oQueryHead.uFront == (oQueryHead.uRear + 1) % oQueryHead.uAllCount;
+	return oQueryHead.uDataCount == oQueryHead.uAllCount;
 }
 
 template<typename T>
 int TaskQueue<T>::getSize() {
 	QueueHead oQueryHead;
 	memcpy(&oQueryHead, m_pShm, sizeof(QueueHead));
-	return oQueryHead.uDataCount;//这里还要改进，datacount没更新
+	return oQueryHead.uDataCount;
 }
 
 template<typename T>
@@ -175,6 +175,7 @@ int TaskQueue<T>::push(T a){
 	char *p = m_pShm + sizeof(QueueHead) + oQueryHead.uRear * sizeof(T);//计算队列尾的开始地址
 	//(uint32_t*)(m_pShm+sizeof(int)*2) 这个东西在计算队列信息结构体中uRear的开始地址
 	*((uint32_t*)(m_pShm + sizeof(int) * 2)) = (oQueryHead.uRear + 1) % oQueryHead.uAllCount;//更新队列尾的位置
+	*(uint32_t*)(m_pShm) = *(uint32_t*)(m_pShm) + 1;
 	memcpy(p,&a,sizeof(T));//把Item放入队列
 	return 0;
 }
@@ -184,6 +185,7 @@ T TaskQueue<T>::pop()
 {
 	semLockGuard oLock(m_Sem);
 	if (isEmpty()) {
+		std::cout<<"empty\n";
 		return T();//应该选择抛出异常等方式，待改进
 	}
 	QueueHead oQueryHead;
@@ -194,6 +196,7 @@ T TaskQueue<T>::pop()
 	memcpy(&odata,p,sizeof(T));//取出数据
 	//(uint32_t*)(m_pShm+sizeof(int)*1) 这个东西在计算队列信息结构体中uFront的开始地址
 	*((uint32_t*)(m_pShm+sizeof(int)*1))= ((oQueryHead.uFront+ 1) % oQueryHead.uAllCount);//更新队列头的位置
+	*(uint32_t*)(m_pShm) = *(uint32_t*)(m_pShm) - 1;
 	return odata;
 }
 

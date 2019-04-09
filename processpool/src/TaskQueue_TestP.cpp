@@ -21,12 +21,11 @@ int main()
     TaskQueue<int> Q;
     int ret = Q.Init();
     if(ret<0) return -1;
-    int i = 0;
-    for(int j=0;j<20;j++)
+    for(int i=0;i<20;i++)
     {
         usleep(200000);
-        Q.push(i++);
-        std::cout<<"parent:"<<i<<std::endl;
+        Q.push(i);
+        std::cout<<"parent:"<<i<<" "<<Q.getSize()<<std::endl;
     }
     return 0;
 }
