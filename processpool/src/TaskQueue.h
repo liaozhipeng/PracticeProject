@@ -14,7 +14,7 @@
 #define SHMQUEUEERROR -1
 #define PATHNAME "."//创建key
 #define PROJ_ID1 0x661 
-#define PROJ_ID2 0x555
+#define PROJ_ID2 0x552
 
 //这个队列这里应该优化，传入key值，这样可以控制共享内存打开哪一个
 
@@ -53,7 +53,7 @@ private:
 	SemLock &m_Sem;
 };
 
-static const uint32_t SHMSIZE = 4*100+24;//这里的24是下面六个成员变量需要占用的空间 4*100是共享内存占得空间 应该要弄大一点
+static const uint32_t SHMSIZE = 24 + 32*100;//这里的24是下面六个成员变量需要占用的空间 4*100是共享内存占得空间 应该要弄大一点
 class QueueHead {
 public:
 	uint32_t uDataCount;//数据量计数

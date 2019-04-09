@@ -12,7 +12,7 @@ using namespace std;
 class Process
 {
 public:
-    typedef std::function<void*()> ProcessFunc;
+    typedef function<void*()> ProcessFunc;
     Process(const ProcessFunc & func);
     Process();
     ~Process();
